@@ -13,6 +13,8 @@
     "@imagen-construct/contracts": "workspace:*",
     "@imagen-construct/core": "workspace:*",
     "@vitejs/plugin-react": "latest",
+    "konva": "^9.3.22",
+    "react-konva": "^19.0.10",
     "vite": "latest",
     "typescript": "^5.9.2",
     "react": "latest",
