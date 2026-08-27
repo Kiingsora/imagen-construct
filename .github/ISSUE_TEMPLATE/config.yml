@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Project scope and roadmap
+    url: https://github.com/Kiingsora/imagen-construct/blob/main/ROADMAP.md
+    about: Check whether the proposal belongs to the current phase.
+  - name: Security report
+    url: https://github.com/Kiingsora/imagen-construct/security/advisories/new
+    about: Report vulnerabilities privately when private reporting is enabled.
