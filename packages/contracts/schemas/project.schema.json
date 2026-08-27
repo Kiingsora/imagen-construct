@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://imagen-construct.dev/schemas/project-0.2.0.schema.json",
+  "title": "Imagen Construct Project",
+  "description": "Canonical schema for an Imagen Construct layer-first project.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["formatVersion", "id", "name", "createdAt", "updatedAt", "canvas", "layers"],
+  "properties": {
+    "formatVersion": { "type": "string", "const": "0.2.0" },
+    "id": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "name": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" },
+    "canvas": { "$ref": "#/$defs/canvas" },
+    "layers": { "type": "array", "items": { "$ref": "#/$defs/layer" } },
+    "generationDefaults": { "$ref": "#/$defs/generationDefaults" }
+  },
+  "$defs": {
+    "canvas": { "type": "object", "additionalProperties": false, "required": ["width", "height", "backgroundColor"], "properties": { "width": { "type": "integer", "minimum": 64, "maximum": 16384 }, "height": { "type": "integer", "minimum": 64, "maximum": 16384 }, "backgroundColor": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$" } } },
+    "transform": { "type": "object", "additionalProperties": false, "required": ["x", "y", "scaleX", "scaleY", "rotation"], "properties": { "x": { "type": "number" }, "y": { "type": "number" }, "scaleX": { "type": "number", "exclusiveMinimum": 0 }, "scaleY": { "type": "number", "exclusiveMinimum": 0 }, "rotation": { "type": "number" } } },
+    "asset": { "type": "object", "additionalProperties": false, "required": ["path", "mediaType", "width", "height"], "properties": { "path": { "type": "string", "minLength": 1, "pattern": "^(?![A-Za-z]:[\\\\/])(?![\\\\/])(?!.*(?:^|[\\\\/])\\.\\.(?:[\\\\/]|$)).+" }, "mediaType": { "type": "string", "enum": ["image/png", "image/webp"] }, "width": { "type": "integer", "minimum": 1, "maximum": 32768 }, "height": { "type": "integer", "minimum": 1, "maximum": 32768 }, "checksumSha256": { "type": "string", "pattern": "^[0-9A-Fa-f]{64}$" }, "hasAlpha": { "type": "boolean", "default": true } } },
+    "prompt": { "type": "object", "additionalProperties": false, "properties": { "positive": { "type": "string", "maxLength": 20000 }, "negative": { "type": "string", "maxLength": 20000 } } },
+    "generationMetadata": { "type": "object", "additionalProperties": false, "properties": { "adapterId": { "type": "string", "minLength": 1, "maxLength": 200 }, "modelId": { "type": "string", "minLength": 1, "maxLength": 500 }, "workflowId": { "type": "string", "minLength": 1, "maxLength": 500 }, "seed": { "type": "integer", "minimum": 0 }, "prompt": { "$ref": "#/$defs/prompt" }, "generatedAt": { "type": "string", "format": "date-time" }, "sourceJobId": { "type": "string", "minLength": 1, "maxLength": 200 } } },
+    "layer": { "type": "object", "additionalProperties": false, "required": ["id", "name", "kind", "visible", "locked", "opacity", "transform", "asset"], "properties": { "id": { "type": "string", "minLength": 1, "maxLength": 200 }, "name": { "type": "string", "minLength": 1, "maxLength": 200 }, "kind": { "type": "string", "enum": ["background", "generated", "imported"] }, "visible": { "type": "boolean" }, "locked": { "type": "boolean" }, "opacity": { "type": "number", "minimum": 0, "maximum": 1 }, "blendMode": { "type": "string", "const": "normal", "default": "normal" }, "transform": { "$ref": "#/$defs/transform" }, "asset": { "$ref": "#/$defs/asset" }, "generation": { "$ref": "#/$defs/generationMetadata" } } },
+    "generationDefaults": { "type": "object", "additionalProperties": false, "properties": { "adapterId": { "type": "string", "minLength": 1, "maxLength": 200 }, "modelId": { "type": "string", "minLength": 1, "maxLength": 500 }, "previewWidth": { "type": "integer", "minimum": 64, "maximum": 4096 }, "previewHeight": { "type": "integer", "minimum": 64, "maximum": 4096 } } }
+  }
+}
