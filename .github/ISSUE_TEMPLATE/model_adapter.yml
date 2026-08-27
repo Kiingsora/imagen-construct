@@ -1,0 +1,58 @@
+name: Model or adapter experiment
+description: Propose or report an inference integration experiment
+title: "experiment: "
+labels:
+  - type:experiment
+  - area:model
+body:
+  - type: input
+    id: source
+    attributes:
+      label: Official model or project source
+      placeholder: https://...
+    validations:
+      required: true
+  - type: input
+    id: identifier
+    attributes:
+      label: Exact model/checkpoint identifier
+    validations:
+      required: true
+  - type: input
+    id: license
+    attributes:
+      label: License
+    validations:
+      required: true
+  - type: textarea
+    id: capability
+    attributes:
+      label: Capability for Imagen Construct
+      description: Transparent generation, edit, segmentation, decomposition, depth, pose, or another focused capability.
+    validations:
+      required: true
+  - type: textarea
+    id: hardware
+    attributes:
+      label: Tested hardware and software
+      description: GPU, VRAM, RAM, OS, driver, Python, backend, and versions.
+    validations:
+      required: true
+  - type: textarea
+    id: results
+    attributes:
+      label: Results
+      description: Memory, timing, quality, failure cases, and reproducibility.
+    validations:
+      required: true
+  - type: checkboxes
+    id: policy
+    attributes:
+      label: Licensing and repository policy
+      options:
+        - label: No model weights are included in the issue or proposed pull request.
+          required: true
+        - label: I checked whether commercial use is allowed.
+          required: true
+        - label: I documented known restrictions and custom-node dependencies.
+          required: true
