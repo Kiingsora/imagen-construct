@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use Imagen Construct in research or a published project, please cite the repository."
+title: "Imagen Construct"
+type: software
+authors:
+  - family-names: "Mansouri"
+    given-names: "Hichem"
+    alias: "Kiingsora"
+repository-code: "https://github.com/Kiingsora/imagen-construct"
+license: "Apache-2.0"
+version: "0.0.0"
+date-released: "2026-08-27"
+abstract: "A local-first, model-agnostic generative image editor where each generated scene element is an independent, editable layer."
+keywords:
+  - generative-ai
+  - image-editing
+  - layers
+  - local-ai
+  - comfyui
