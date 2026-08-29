@@ -1,0 +1,48 @@
+name: Refresh dependency lockfiles
+
+on:
+  push:
+    branches: [feat/mvp0-editor]
+    paths:
+      - package.json
+      - pnpm-workspace.yaml
+      - apps/editor/package.json
+      - packages/*/package.json
+      - services/generation/pyproject.toml
+      - .github/workflows/refresh-lockfiles.yml
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/mvp0-editor
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: astral-sh/setup-uv@v6
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pnpm install --lockfile-only --no-frozen-lockfile
+      - working-directory: services/generation
+        run: uv lock
+      - name: Commit generated lockfiles
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pnpm-lock.yaml services/generation/uv.lock
+          if git diff --cached --quiet; then
+            echo "Lockfiles are already current."
+          else
+            git commit -m "chore: commit dependency lockfiles"
+            git push origin HEAD:feat/mvp0-editor
+          fi
