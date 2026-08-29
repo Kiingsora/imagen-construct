@@ -29,7 +29,7 @@ test("completes the MVP 0 project workflow", async ({ page }) => {
   await sourceLayer.locator(".layer-main").click();
 
   await page.getByRole("button", { name: "Properties" }).click();
-  const xField = page.getByRole("spinbutton", { name: "X" });
+  const xField = page.getByRole("spinbutton", { name: "X", exact: true });
   await xField.fill("160");
   await expect(xField).toHaveValue("160");
 
