@@ -1,0 +1,9 @@
+from typing import Protocol
+
+from imagen_construct.domain.project import ProjectDocument
+
+
+class ProjectRepository(Protocol):
+    def create(self, project: ProjectDocument) -> ProjectDocument: ...
+    def get(self, project_id: str) -> ProjectDocument: ...
+    def save(self, project_id: str, project: ProjectDocument) -> ProjectDocument: ...

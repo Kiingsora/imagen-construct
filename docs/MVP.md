@@ -1,5 +1,15 @@
 # Minimum Viable Product
 
+## Implementation status
+
+| Checkpoint | Status | Evidence |
+| --- | --- | --- |
+| MVP 0 — interaction prototype | **Implemented** | Frontend, backend, and Playwright workflow checks pass in CI on PR #1 |
+| MVP 0 — external usability validation | **Pending** | At least three people other than the primary developer must complete the reference scenario |
+| MVP 1 — local generative proof | **Not started** | The next milestone begins with a deterministic mock adapter |
+
+The automated MVP 0 scenario covers project creation, image import, property editing, duplication, undo/redo, visibility, save/reopen, and PNG export. Passing automation proves integration stability; it does not replace observation of real users.
+
 ## Objective
 
 Validate one hypothesis:
@@ -10,7 +20,7 @@ The MVP is intentionally split into two checkpoints. The first validates the edi
 
 ## MVP 0 — Interaction prototype
 
-MVP 0 uses prepared RGBA image fixtures. It must prove that the editing workflow is understandable and useful before model integration adds cost and uncertainty.
+MVP 0 uses imported or prepared RGBA image fixtures. It must prove that the editing workflow is understandable and useful before model integration adds cost and uncertainty.
 
 ### Required capabilities
 
@@ -51,7 +61,7 @@ A new user can create this composition using only the interface:
 7. hide and restore the character;
 8. save, reopen, and export.
 
-The test succeeds when the user completes it without developer guidance and understands that each item is independent.
+The usability test succeeds when the user completes it without developer guidance and understands that each item is independent.
 
 ## MVP 1 — Local generative proof
 
@@ -70,9 +80,18 @@ MVP 1 adds one local generation adapter while preserving every capability from M
 | Failure recovery | Keep previous result | A failed regeneration does not destroy the prior layer asset |
 | Cancellation | Cancel pending or active work | The editor remains usable after cancellation |
 
-### Recommended first generation paths
+### Implementation order
 
-Choose exactly one for the first implementation:
+1. Define model-independent generation contracts.
+2. Implement job state, queue, cancellation, and progress events.
+3. Implement a deterministic mock adapter.
+4. Connect the editor prompt and generation panels.
+5. Validate selective regeneration without a GPU.
+6. Connect exactly one real local image pipeline.
+
+### Candidate real generation paths
+
+Choose exactly one after the mock workflow is stable:
 
 1. **LayerDiffuse + SDXL** for native transparent text-to-image output.
 2. **Generic generator + cutout model** for a model-agnostic proof.
@@ -90,9 +109,9 @@ The user creates a four-layer scene locally:
 
 The user then changes the sofa prompt and regenerates only that layer. The background, character, table, transforms, and project metadata remain unchanged.
 
-## Definition of done
+## Definition of done for the complete MVP
 
-The MVP is complete only when all of the following are true:
+The complete MVP, including the generative checkpoint, is finished only when all of the following are true:
 
 - the reference scenario works from a clean install;
 - no paid API is required;
