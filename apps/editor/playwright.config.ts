@@ -33,7 +33,7 @@ export default defineConfig({
   webServer: [
     {
       command:
-        "uv --directory ../../services/generation run uvicorn imagen_construct.main:app --host 127.0.0.1 --port 8000",
+        "cd ../../services/generation && PYTHONPATH=src uv run uvicorn imagen_construct.main:app --host 127.0.0.1 --port 8000",
       url: "http://127.0.0.1:8000/health",
       reuseExistingServer: !isCI,
       timeout: 120_000,

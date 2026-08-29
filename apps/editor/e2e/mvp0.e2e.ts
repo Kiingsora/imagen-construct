@@ -11,7 +11,7 @@ test("completes the MVP 0 project workflow", async ({ page }) => {
   await page.getByLabel("Project name").fill("MVP 0 E2E");
   await page.getByRole("button", { name: "Create project" }).click();
 
-  await expect(page.getByRole("strong").filter({ hasText: "Imagen Construct" })).toBeVisible();
+  await expect(page.locator(".topbar-brand strong")).toHaveText("Imagen Construct");
   await expect(page.locator(".save-status")).toHaveText("Saved");
 
   await page.getByRole("button", { name: /Add Layer/ }).first().click();
