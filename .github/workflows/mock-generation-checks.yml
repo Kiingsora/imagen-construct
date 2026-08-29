@@ -1,0 +1,43 @@
+name: Mock generation checks
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [feat/mock-generation]
+
+jobs:
+  mock-generation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - uses: astral-sh/setup-uv@v6
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pnpm install --no-frozen-lockfile
+      - working-directory: services/generation
+        run: uv sync --dev
+      - working-directory: services/generation
+        run: uv run ruff check .
+      - working-directory: services/generation
+        run: uv run pytest -q
+      - run: pnpm typecheck
+      - run: pnpm test:unit
+      - run: pnpm build
+      - run: pnpm --filter @imagen-construct/mock-e2e exec playwright install --with-deps chromium
+      - run: pnpm --filter @imagen-construct/mock-e2e test:e2e
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mock-generation-playwright-report
+          path: apps/mock-e2e/playwright-report
+          if-no-files-found: ignore
