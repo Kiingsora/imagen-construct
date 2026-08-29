@@ -4,7 +4,9 @@ from imagen_construct.application.asset_service import AssetService
 from imagen_construct.application.project_service import ProjectService
 from imagen_construct.config import get_settings
 from imagen_construct.infrastructure.assets.file_asset_store import FileAssetStore
-from imagen_construct.infrastructure.persistence.file_project_repository import FileProjectRepository
+from imagen_construct.infrastructure.persistence.file_project_repository import (
+    FileProjectRepository,
+)
 
 
 @lru_cache

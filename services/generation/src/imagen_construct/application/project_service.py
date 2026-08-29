@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from imagen_construct.domain.project import ProjectDocument
@@ -6,14 +6,19 @@ from imagen_construct.ports.project_repository import ProjectRepository
 
 
 def _now() -> str:
-    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    return datetime.now(UTC).isoformat().replace("+00:00", "Z")
 
 
 class ProjectService:
     def __init__(self, repository: ProjectRepository) -> None:
         self._repository = repository
 
-    def create_project(self, name: str, width: int = 1024, height: int = 1024) -> ProjectDocument:
+    def create_project(
+        self,
+        name: str,
+        width: int = 1024,
+        height: int = 1024,
+    ) -> ProjectDocument:
         clean_name = name.strip()
         if not clean_name:
             raise ValueError("Project name cannot be empty.")

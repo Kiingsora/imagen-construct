@@ -3,7 +3,9 @@ from pathlib import Path
 import pytest
 
 from imagen_construct.domain.errors import ProjectStorageError
-from imagen_construct.infrastructure.persistence.file_project_repository import FileProjectRepository
+from imagen_construct.infrastructure.persistence.file_project_repository import (
+    FileProjectRepository,
+)
 
 
 def project(project_id: str = "project-1") -> dict:

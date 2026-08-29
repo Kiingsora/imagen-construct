@@ -4,7 +4,9 @@ from fastapi.testclient import TestClient
 
 from imagen_construct.api.dependencies import get_project_service
 from imagen_construct.application.project_service import ProjectService
-from imagen_construct.infrastructure.persistence.file_project_repository import FileProjectRepository
+from imagen_construct.infrastructure.persistence.file_project_repository import (
+    FileProjectRepository,
+)
 from imagen_construct.main import app
 
 

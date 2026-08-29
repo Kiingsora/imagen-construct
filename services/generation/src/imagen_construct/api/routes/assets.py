@@ -9,13 +9,15 @@ from imagen_construct.domain.errors import ProjectNotFoundError, ProjectStorageE
 from imagen_construct.ports.asset_store import StoredAsset
 
 router = APIRouter(prefix="/v1/projects/{project_id}/assets", tags=["assets"])
+AssetServiceDependency = Annotated[AssetService, Depends(get_asset_service)]
+AssetUpload = Annotated[UploadFile, File()]
 
 
 @router.post("", status_code=status.HTTP_201_CREATED)
 async def upload_asset(
     project_id: str,
-    file: Annotated[UploadFile, File()],
-    service: AssetService = Depends(get_asset_service),
+    file: AssetUpload,
+    service: AssetServiceDependency,
 ) -> StoredAsset:
     try:
         payload = await file.read(service.max_upload_bytes + 1)
@@ -34,7 +36,7 @@ async def upload_asset(
 def get_asset(
     project_id: str,
     asset_name: str,
-    service: AssetService = Depends(get_asset_service),
+    service: AssetServiceDependency,
 ) -> FileResponse:
     try:
         path = service.resolve_asset(project_id, asset_name)

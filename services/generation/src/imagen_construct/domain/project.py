@@ -1,3 +1,3 @@
-from typing import Any, TypeAlias
+from typing import Any
 
-ProjectDocument: TypeAlias = dict[str, Any]
+type ProjectDocument = dict[str, Any]
