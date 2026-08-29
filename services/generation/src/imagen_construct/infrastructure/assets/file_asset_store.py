@@ -2,6 +2,7 @@ import hashlib
 import os
 import re
 import tempfile
+import warnings
 from io import BytesIO
 from pathlib import Path
 from uuid import uuid4
@@ -41,17 +42,28 @@ class FileAssetStore:
             raise ProjectStorageError("Uploaded image exceeds the 32 MB limit.")
 
         try:
-            with Image.open(BytesIO(payload)) as image:
-                image.load()
-                image_format = image.format or ""
-                if image_format not in _SUPPORTED_FORMATS:
-                    raise ProjectStorageError("Only PNG and WebP images are supported.")
-                width, height = image.size
-                if width < 1 or height < 1 or width * height > self.max_pixels:
-                    raise ProjectStorageError("Image dimensions exceed the supported limit.")
-                has_alpha = image.mode in {"RGBA", "LA"} or "transparency" in image.info
-        except (UnidentifiedImageError, OSError) as error:
-            raise ProjectStorageError("Uploaded file is not a valid image.") from error
+            with warnings.catch_warnings():
+                warnings.simplefilter("error", Image.DecompressionBombWarning)
+                with Image.open(BytesIO(payload)) as image:
+                    image_format = image.format or ""
+                    if image_format not in _SUPPORTED_FORMATS:
+                        raise ProjectStorageError("Only PNG and WebP images are supported.")
+
+                    width, height = image.size
+                    if width < 1 or height < 1 or width * height > self.max_pixels:
+                        raise ProjectStorageError("Image dimensions exceed the supported limit.")
+
+                    image.load()
+                    has_alpha = image.mode in {"RGBA", "LA"} or "transparency" in image.info
+        except ProjectStorageError:
+            raise
+        except (
+            UnidentifiedImageError,
+            OSError,
+            Image.DecompressionBombError,
+            Image.DecompressionBombWarning,
+        ) as error:
+            raise ProjectStorageError("Uploaded file is not a safe, valid image.") from error
 
         extension, media_type = _SUPPORTED_FORMATS[image_format]
         asset_name = f"{uuid4().hex}.{extension}"
@@ -90,8 +102,9 @@ class FileAssetStore:
     def resolve_asset(self, project_id: str, asset_name: str) -> Path:
         if not _ASSET_NAME.fullmatch(asset_name):
             raise ProjectStorageError("Asset name contains unsupported characters.")
-        asset_path = (self._project_dir(project_id) / "assets" / asset_name).resolve()
-        assets_dir = (self._project_dir(project_id) / "assets").resolve()
+        project_dir = self._project_dir(project_id)
+        assets_dir = (project_dir / "assets").resolve()
+        asset_path = (assets_dir / asset_name).resolve()
         if asset_path.parent != assets_dir or not asset_path.is_file():
             raise ProjectNotFoundError(asset_name)
         return asset_path

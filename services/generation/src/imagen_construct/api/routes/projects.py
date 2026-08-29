@@ -1,4 +1,4 @@
-from typing import Annotated, Any
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, ConfigDict, Field
@@ -6,6 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from imagen_construct.api.dependencies import get_project_service
 from imagen_construct.application.project_service import ProjectService
 from imagen_construct.domain.errors import ProjectNotFoundError, ProjectStorageError
+from imagen_construct.domain.project import ProjectDocument
 
 router = APIRouter(prefix="/v1/projects", tags=["projects"])
 ProjectServiceDependency = Annotated[ProjectService, Depends(get_project_service)]
@@ -22,7 +23,7 @@ class CreateProjectRequest(BaseModel):
 def create_project(
     request: CreateProjectRequest,
     service: ProjectServiceDependency,
-) -> dict[str, Any]:
+) -> ProjectDocument:
     try:
         return service.create_project(request.name, request.width, request.height)
     except (ValueError, ProjectStorageError) as error:
@@ -33,7 +34,7 @@ def create_project(
 def get_project(
     project_id: str,
     service: ProjectServiceDependency,
-) -> dict[str, Any]:
+) -> ProjectDocument:
     try:
         return service.get_project(project_id)
     except ProjectNotFoundError as error:
@@ -45,9 +46,9 @@ def get_project(
 @router.put("/{project_id}")
 def save_project(
     project_id: str,
-    project: dict[str, Any],
+    project: ProjectDocument,
     service: ProjectServiceDependency,
-) -> dict[str, Any]:
+) -> ProjectDocument:
     try:
         return service.save_project(project_id, project)
     except ProjectNotFoundError as error:

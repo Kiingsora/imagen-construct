@@ -1,12 +1,13 @@
 from datetime import UTC, datetime
 from uuid import uuid4
 
-from imagen_construct.domain.project import ProjectDocument
+from imagen_construct.domain.errors import ProjectStorageError
+from imagen_construct.domain.project import CanvasSettings, ProjectDocument
 from imagen_construct.ports.project_repository import ProjectRepository
 
 
-def _now() -> str:
-    return datetime.now(UTC).isoformat().replace("+00:00", "Z")
+def _now() -> datetime:
+    return datetime.now(UTC)
 
 
 class ProjectService:
@@ -19,27 +20,25 @@ class ProjectService:
         width: int = 1024,
         height: int = 1024,
     ) -> ProjectDocument:
-        clean_name = name.strip()
-        if not clean_name:
-            raise ValueError("Project name cannot be empty.")
-        if width < 64 or height < 64:
-            raise ValueError("Canvas dimensions must be at least 64 pixels.")
-        now = _now()
-        project: ProjectDocument = {
-            "formatVersion": "0.2.0",
-            "id": str(uuid4()),
-            "name": clean_name,
-            "createdAt": now,
-            "updatedAt": now,
-            "canvas": {"width": width, "height": height, "backgroundColor": "#00000000"},
-            "layers": [],
-        }
+        project = ProjectDocument(
+            id=str(uuid4()),
+            name=name,
+            createdAt=_now(),
+            updatedAt=_now(),
+            canvas=CanvasSettings(
+                width=width,
+                height=height,
+                backgroundColor="#00000000",
+            ),
+            layers=[],
+        )
         return self._repository.create(project)
 
     def get_project(self, project_id: str) -> ProjectDocument:
         return self._repository.get(project_id)
 
     def save_project(self, project_id: str, project: ProjectDocument) -> ProjectDocument:
-        next_project = dict(project)
-        next_project["updatedAt"] = _now()
+        if project.id != project_id:
+            raise ProjectStorageError("Project id cannot change during save.")
+        next_project = project.model_copy(update={"updatedAt": _now()})
         return self._repository.save(project_id, next_project)
