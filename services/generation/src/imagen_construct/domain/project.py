@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 from pathlib import PurePosixPath
 from typing import Literal, Self
@@ -30,10 +31,10 @@ class LayerTransform(DomainModel):
 
 
 class AssetReference(DomainModel):
-    path: str = Field(min_length=1, max_length=263)
+    path: str = Field(min_length=8, max_length=263)
     mediaType: Literal["image/png", "image/webp"]
-    width: int = Field(ge=1, le=16384)
-    height: int = Field(ge=1, le=16384)
+    width: int = Field(ge=1, le=32768)
+    height: int = Field(ge=1, le=32768)
     checksumSha256: str | None = Field(default=None, pattern=_CHECKSUM_PATTERN)
     hasAlpha: bool = True
 
@@ -48,31 +49,28 @@ class AssetReference(DomainModel):
         asset_name = path.parts[1]
         if asset_name in {"", ".", ".."}:
             raise ValueError("Asset path contains an invalid file name.")
-
-        import re
-
         if re.fullmatch(_ASSET_NAME_PATTERN, asset_name) is None:
             raise ValueError("Asset path contains unsupported characters.")
         return value
 
 
 class GenerationPrompt(DomainModel):
-    positive: str | None = None
-    negative: str | None = None
+    positive: str | None = Field(default=None, max_length=20000)
+    negative: str | None = Field(default=None, max_length=20000)
 
 
 class GenerationMetadata(DomainModel):
-    adapterId: str | None = Field(default=None, max_length=200)
-    modelId: str | None = Field(default=None, max_length=300)
-    workflowId: str | None = Field(default=None, max_length=200)
+    adapterId: str | None = Field(default=None, min_length=1, max_length=200)
+    modelId: str | None = Field(default=None, min_length=1, max_length=500)
+    workflowId: str | None = Field(default=None, min_length=1, max_length=500)
     seed: int | None = Field(default=None, ge=0)
     prompt: GenerationPrompt | None = None
     generatedAt: datetime | None = None
-    sourceJobId: str | None = Field(default=None, max_length=200)
+    sourceJobId: str | None = Field(default=None, min_length=1, max_length=200)
 
 
 class Layer(DomainModel):
-    id: str = Field(min_length=1, max_length=128)
+    id: str = Field(min_length=1, max_length=200)
     name: str = Field(min_length=1, max_length=200)
     kind: Literal["background", "generated", "imported"]
     visible: bool
@@ -93,10 +91,10 @@ class Layer(DomainModel):
 
 
 class GenerationDefaults(DomainModel):
-    adapterId: str | None = Field(default=None, max_length=200)
-    modelId: str | None = Field(default=None, max_length=300)
-    previewWidth: int | None = Field(default=None, ge=64, le=16384)
-    previewHeight: int | None = Field(default=None, ge=64, le=16384)
+    adapterId: str | None = Field(default=None, min_length=1, max_length=200)
+    modelId: str | None = Field(default=None, min_length=1, max_length=500)
+    previewWidth: int | None = Field(default=None, ge=64, le=4096)
+    previewHeight: int | None = Field(default=None, ge=64, le=4096)
 
 
 class ProjectDocument(DomainModel):

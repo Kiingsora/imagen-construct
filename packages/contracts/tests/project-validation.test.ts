@@ -55,9 +55,22 @@ describe("validateProjectDocument", () => {
     }
   });
 
-  it("rejects absolute asset paths", () => {
+  it.each([
+    "C:\\images\\sofa.png",
+    "/tmp/sofa.png",
+    "assets/../sofa.png",
+    "assets/nested/sofa.png",
+    "other/sofa.png",
+  ])("rejects unsafe asset path %s", (path) => {
     const project = validProject();
-    project.layers[0]!.asset.path = "C:\\images\\sofa.png";
+    project.layers[0]!.asset.path = path;
+
+    expect(validateProjectDocument(project).valid).toBe(false);
+  });
+
+  it("rejects project identifiers unsupported by local storage", () => {
+    const project = validProject();
+    project.id = "../project";
 
     expect(validateProjectDocument(project).valid).toBe(false);
   });
