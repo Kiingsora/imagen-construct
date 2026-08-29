@@ -1,0 +1,14 @@
+{
+  "name": "@imagen-construct/mock-e2e",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@types/node": "^22.10.0",
+    "typescript": "^5.9.2"
+  }
+}
