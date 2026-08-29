@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://imagen-construct.dev/schemas/comfyui-workflow-manifest.schema.json",
+  "title": "Imagen Construct ComfyUI Workflow Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "version",
+    "name",
+    "workflowFile",
+    "outputNodeId",
+    "outputKind",
+    "bindings"
+  ],
+  "properties": {
+    "id": {"type": "string", "minLength": 1},
+    "version": {"type": "string", "minLength": 1},
+    "name": {"type": "string", "minLength": 1},
+    "workflowFile": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]*\\.json$"
+    },
+    "outputNodeId": {"type": "string", "minLength": 1},
+    "outputKind": {"enum": ["rgba", "rgb"]},
+    "bindings": {
+      "type": "object",
+      "required": ["prompt", "seed", "width", "height"],
+      "additionalProperties": {
+        "$ref": "#/$defs/binding"
+      },
+      "properties": {
+        "prompt": {"$ref": "#/$defs/binding"},
+        "negativePrompt": {"$ref": "#/$defs/binding"},
+        "seed": {"$ref": "#/$defs/binding"},
+        "width": {"$ref": "#/$defs/binding"},
+        "height": {"$ref": "#/$defs/binding"},
+        "steps": {"$ref": "#/$defs/binding"},
+        "cfg": {"$ref": "#/$defs/binding"}
+      }
+    },
+    "requiredModels": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "default": []
+    },
+    "requiredCustomNodes": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "default": []
+    }
+  },
+  "$defs": {
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["nodeId", "input"],
+      "properties": {
+        "nodeId": {"type": "string", "minLength": 1},
+        "input": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

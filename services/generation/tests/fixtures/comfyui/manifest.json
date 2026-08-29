@@ -1,0 +1,16 @@
+{
+  "id": "test-workflow",
+  "version": "1.0.0",
+  "name": "Test workflow",
+  "workflowFile": "workflow.json",
+  "outputNodeId": "9",
+  "outputKind": "rgba",
+  "bindings": {
+    "prompt": {"nodeId": "1", "input": "text"},
+    "seed": {"nodeId": "2", "input": "seed"},
+    "width": {"nodeId": "3", "input": "width"},
+    "height": {"nodeId": "3", "input": "height"}
+  },
+  "requiredModels": ["test-model.safetensors"],
+  "requiredCustomNodes": []
+}
