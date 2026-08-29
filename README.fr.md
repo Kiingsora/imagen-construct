@@ -1,101 +1,110 @@
 # Imagen Construct
 
-> Un éditeur d’images génératives open source et local-first dans lequel chaque élément généré devient un calque indépendant et modifiable.
+> Un éditeur d’images open source et local-first dans lequel les éléments générés ou importés restent des calques indépendants et modifiables.
 
-[English](README.md) · [Cadrage du projet](PROJECT_BRIEF.md) · [MVP](docs/MVP.md) · [Architecture](docs/ARCHITECTURE.md) · [Rapport de conception](docs/CONCEPTION.fr.md) · [Feuille de route](ROADMAP.md)
+[English](README.md) · [Installation](docs/development/GETTING_STARTED.md) · [MVP](docs/MVP.md) · [Architecture](docs/ARCHITECTURE.md) · [Feuille de route](ROADMAP.md)
 
-## État du projet
+## État actuel
 
-**Concept et architecture / pré-alpha.** Le dépôt formalise actuellement le produit, le plus petit MVP crédible, la direction technique et l’organisation des contributions. Il ne contient pas encore d’éditeur utilisable.
+**MVP 0 — éditeur d’interaction implémenté et validé par la CI.**
 
-## Le problème
+L’application peut maintenant créer des projets locaux, importer des images PNG/WebP comme calques indépendants, les manipuler sans détruire les autres éléments, sauvegarder/rouvrir le projet et exporter la composition visible en PNG. La génération d’images réelle n’est pas encore connectée : la prochaine étape est un adaptateur de génération factice et déterministe.
 
-La majorité des générateurs d’images produisent un résultat aplati. Lorsqu’un seul objet est mauvais, l’utilisateur doit souvent régénérer ou repeindre une partie beaucoup plus large de l’image. Les petites corrections deviennent lentes, imprévisibles et destructrices.
+## Fonctionnalités disponibles
 
-## La proposition
+- interface desktop conforme à la structure validée : haut, outils à gauche, canvas central, inspecteur à droite et panneau inférieur ;
+- création de projet et persistance dans un `project.json` versionné ;
+- images stockées comme fichiers ordinaires dans `assets/` ;
+- import, sélection, déplacement, redimensionnement, rotation et réorganisation des calques ;
+- visibilité, verrouillage, opacité, renommage, duplication et suppression ;
+- Undo et Redo ;
+- onglets `Layers`, `Properties` et `History` ;
+- zoom, déplacement de la vue et ajustement du canvas ;
+- export PNG aplati ;
+- validation des imports PNG/WebP, checksum et écritures atomiques ;
+- tests frontend, backend et navigateur Playwright dans GitHub Actions.
 
-Imagen Construct considère le **calque** comme l’unité fondamentale de génération.
+## Lancer le projet
 
-1. Générer ou importer un arrière-plan.
-2. Ajouter un calque et décrire un élément.
-3. Déplacer, redimensionner, tourner, masquer, réordonner ou supprimer cet élément.
-4. Régénérer uniquement le calque sélectionné.
-5. Exporter l’image composée sans reconstruire toute la scène.
+```bash
+git clone https://github.com/Kiingsora/imagen-construct.git
+cd imagen-construct
+git switch feat/mvp0-editor
+
+corepack enable
+corepack prepare pnpm@10.15.0 --activate
+pnpm install --frozen-lockfile
+uv --directory services/generation sync --frozen --dev
+```
+
+Dans deux terminaux :
+
+```bash
+pnpm dev:api
+```
+
+```bash
+pnpm dev:editor
+```
+
+Ouvrir `http://127.0.0.1:5173`. Les instructions détaillées pour Windows, Linux, macOS, la configuration et les tests se trouvent dans [Getting started](docs/development/GETTING_STARTED.md).
+
+## Principe du produit
+
+Le **calque** est l’unité fondamentale de création :
+
+1. générer ou importer un arrière-plan ;
+2. ajouter des éléments indépendants ;
+3. les déplacer, redimensionner, tourner, masquer, réordonner ou supprimer ;
+4. modifier ou régénérer uniquement le calque sélectionné ;
+5. exporter la composition sans reconstruire toute la scène.
 
 ```mermaid
 flowchart LR
-    A[Arrière-plan] --> B[+ Calque généré]
-    B --> C[Placement et redimensionnement]
-    C --> D[Régénération du calque sélectionné]
-    D --> E[Export de la composition]
+    A[Arrière-plan] --> B[Calque indépendant]
+    B --> C[Transformer et organiser]
+    C --> D[Modifier ou régénérer le calque]
+    D --> E[Exporter la composition]
 ```
 
-La vision à long terme ajoute la régénération contextuelle, la profondeur, l’éclairage, la segmentation et des contrôles facultatifs de pose. Ces fonctions sont volontairement exclues du premier MVP.
+## Architecture
 
-## Plus petit MVP crédible
+- **Éditeur :** React, TypeScript, Vite, Konva et Zustand.
+- **Noyau :** commandes, historique, migrations et logique des calques indépendants de l’interface.
+- **Contrats :** schéma de projet versionné et validation à l’exécution.
+- **Service local :** FastAPI, Pydantic, stockage atomique et future orchestration des générations.
+- **Génération :** adaptateurs déclarant leurs capacités ; aucun code ComfyUI dans l’éditeur.
 
-La première version utile doit proposer :
+## Sécurité et persistance
 
-- un canevas 2D ;
-- un panneau de calques ;
-- un prompt par calque généré ;
-- une génération locale via un seul adaptateur ;
-- une sortie RGBA pour les objets générés ;
-- déplacement, redimensionnement, rotation, réorganisation, masquage, verrouillage, duplication et suppression ;
-- régénération du seul calque sélectionné ;
-- sauvegarde et chargement d’un projet ;
-- export PNG ;
-- file de génération visible.
+- L’API écoute uniquement sur `127.0.0.1` par défaut.
+- Les identifiants et noms de ressources sont limités.
+- Les manifestes sont validés avant sauvegarde et après chargement.
+- Les chemins d’images doivent rester sous `assets/`.
+- Les images sont décodées, limitées en taille, vérifiées et écrites atomiquement.
+- Les poids de modèles, secrets et projets utilisateur ne sont pas ajoutés au dépôt.
 
-Le premier prototype d’interaction peut utiliser des PNG transparents préparés à l’avance avant de connecter un modèle. Voir [docs/MVP.md](docs/MVP.md).
+## Prochaine étape
 
-## Principes du produit
+Le début du MVP 1 utilisera un **adaptateur factice déterministe** pour ajouter :
 
-- **Layer-first :** la génération crée des éléments éditables, pas seulement une image finale aplatie.
-- **Non destructif :** modifier un calque ne doit pas réécrire silencieusement les autres.
-- **Local-first :** l’implémentation de référence doit fonctionner sans API payante.
-- **Agnostique au modèle :** les modèles sont reliés par des adaptateurs.
-- **Complexité progressive :** usage simple par défaut ; masques, profondeur et pose restent facultatifs.
-- **Formats ouverts :** les projets restent inspectables et exportables.
+- des requêtes prompt → calque ;
+- une file de travaux sérialisée ;
+- les états en attente, en cours, terminé, échoué et annulé ;
+- une progression visible ;
+- l’annulation et la régénération sélective sécurisée ;
+- un fonctionnement complet sans GPU ni ComfyUI.
 
-## Direction technique initiale
-
-```mermaid
-flowchart LR
-    UI[Éditeur React + TypeScript] <-->|REST + WebSocket| ORCH[Service d’orchestration Python]
-    ORCH --> ADAPTER[Adaptateur de génération]
-    ADAPTER --> COMFY[ComfyUI local]
-    COMFY --> GEN[Modèle d’image]
-    COMFY --> ALPHA[Pipeline transparence / détourage]
-    ORCH --> STORE[Projet + ressources RGBA]
-```
-
-Base recommandée :
-
-- **Frontend :** React, TypeScript, Vite, Konva, Zustand.
-- **Orchestration locale :** Python et FastAPI.
-- **Backend de génération :** ComfyUI via ses API HTTP et WebSocket.
-- **Premier chemin vers la transparence :** LayerDiffuse avec SDXL, ou générateur générique suivi d’un modèle de détourage.
-- **Stockage :** manifeste JSON versionné et ressources RGBA locales.
-
-## Pourquoi l’open source
-
-Le projet n’a pas besoin de battre financièrement les grands acteurs. Sa valeur défendable est un workflow ouvert qui peut rester :
-
-- gratuit à inspecter et modifier ;
-- utilisable localement ;
-- indépendant d’un fournisseur unique ;
-- extensible par des adaptateurs et workflows communautaires ;
-- utile même si les outils commerciaux ajoutent des fonctions semblables.
+Un seul pipeline de génération réelle sera connecté après la validation de ce workflow.
 
 ## Contribution
 
-À ce stade, les contributions les plus utiles sont les critiques produit, prototypes UX, expérimentations de modèles, revues d’architecture et petits adaptateurs de preuve de concept. Lire [CONTRIBUTING.md](CONTRIBUTING.md) et le [backlog initial](docs/INITIAL_BACKLOG.md).
+Lire [CONTRIBUTING.md](CONTRIBUTING.md), [l’architecture](docs/ARCHITECTURE.md) et le [backlog initial](docs/INITIAL_BACKLOG.md) avant toute modification structurelle.
 
 ## Avertissement sur le nom
 
-`imagen-construct` est un nom de travail. Le projet est indépendant et sans affiliation avec Google ou la famille de modèles Google Imagen. Le nom pourra être revu avant une version stable pour réduire les risques de confusion et de référencement.
+`imagen-construct` est un nom de travail. Le projet est indépendant et sans affiliation avec Google ou la famille de modèles Google Imagen. Le nom pourra être revu avant une version stable.
 
 ## Licence
 
-Apache License 2.0. Voir [LICENSE](LICENSE) et [MODEL_LICENSES.md](MODEL_LICENSES.md).
+Apache License 2.0. Les modèles et workflows connectés conservent leurs propres licences. Voir [LICENSE](LICENSE) et [MODEL_LICENSES.md](MODEL_LICENSES.md).

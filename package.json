@@ -12,11 +12,13 @@
   },
   "scripts": {
     "dev:editor": "pnpm --filter @imagen-construct/editor dev",
-    "dev:api": "uv --directory services/generation run uvicorn imagen_construct.main:app --reload --host 127.0.0.1 --port 8000",
+    "dev:api": "uv --directory services/generation run uvicorn --app-dir src imagen_construct.main:app --reload --host 127.0.0.1 --port 8000",
     "build": "pnpm -r --if-present build",
     "typecheck": "pnpm -r --if-present typecheck",
     "test": "pnpm -r --if-present test",
+    "test:backend": "uv --directory services/generation run pytest",
+    "lint:backend": "uv --directory services/generation run ruff check .",
     "test:e2e": "pnpm --filter @imagen-construct/editor test:e2e",
-    "check": "pnpm typecheck && pnpm test && pnpm build"
+    "check": "pnpm typecheck && pnpm test && pnpm build && pnpm lint:backend && pnpm test:backend"
   }
 }
