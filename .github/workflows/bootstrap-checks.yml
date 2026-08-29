@@ -18,6 +18,10 @@ jobs:
         with:
           node-version: 22
       - run: pnpm install --no-frozen-lockfile
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pnpm-lockfile
+          path: pnpm-lock.yaml
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm build
@@ -32,7 +36,40 @@ jobs:
           python-version: "3.12"
       - working-directory: services/generation
         run: uv sync --dev
+      - uses: actions/upload-artifact@v4
+        with:
+          name: uv-lockfile
+          path: services/generation/uv.lock
       - working-directory: services/generation
         run: uv run ruff check .
       - working-directory: services/generation
         run: uv run pytest
+
+  e2e:
+    needs: [frontend, backend]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: astral-sh/setup-uv@v6
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pnpm install --no-frozen-lockfile
+      - working-directory: services/generation
+        run: uv sync --dev
+      - run: pnpm --filter @imagen-construct/editor exec playwright install --with-deps chromium
+      - run: pnpm test:e2e
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mvp0-e2e-results
+          path: |
+            apps/editor/test-results
+            apps/editor/playwright-report
+          if-no-files-found: ignore

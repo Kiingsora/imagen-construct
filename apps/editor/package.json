@@ -7,23 +7,26 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@imagen-construct/contracts": "workspace:*",
     "@imagen-construct/core": "workspace:*",
-    "@vitejs/plugin-react": "latest",
     "konva": "^9.3.22",
-    "react-konva": "^19.0.10",
-    "vite": "latest",
-    "typescript": "^5.9.2",
     "react": "latest",
     "react-dom": "latest",
+    "react-konva": "^19.0.10",
     "zustand": "^5.0.8"
   },
   "devDependencies": {
+    "@playwright/test": "latest",
+    "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
+    "@vitejs/plugin-react": "latest",
+    "typescript": "^5.9.2",
+    "vite": "latest",
     "vitest": "^3.2.4"
   }
 }
